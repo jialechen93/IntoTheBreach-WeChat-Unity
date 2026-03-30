@@ -164,8 +164,22 @@ public class InputManager : MonoBehaviour
         selectedMech = mech;
         currentState = InputState.SelectingMech;
         
-        // 高亮可移动范围
-        HighlightMovableArea(mech);
+        // 使用 VisualEffects 高亮范围
+        VisualEffects effects = FindObjectOfType<VisualEffects>();
+        if (effects != null)
+        {
+            effects.ClearAllHighlights();
+            effects.HighlightMovableArea(mech);
+            if (mech.hasMovedThisTurn)
+            {
+                effects.HighlightAttackRange(mech);
+            }
+        }
+        else
+        {
+            // 兼容旧代码
+            HighlightMovableArea(mech);
+        }
         
         // 选中格子变色
         Cell cell = gridManager.GetCell(mech.currentX, mech.currentY);
@@ -246,14 +260,23 @@ public class InputManager : MonoBehaviour
     /// </summary>
     void ClearHighlight()
     {
-        for (int x = 0; x < gridManager.width; x++)
+        VisualEffects effects = FindObjectOfType<VisualEffects>();
+        if (effects != null)
         {
-            for (int y = 0; y < gridManager.height; y++)
+            effects.ClearAllHighlights();
+        }
+        else
+        {
+            // 兼容旧代码
+            for (int x = 0; x < gridManager.width; x++)
             {
-                Cell cell = gridManager.GetCell(x, y);
-                if (cell != null)
+                for (int y = 0; y < gridManager.height; y++)
                 {
-                    cell.ResetColor();
+                    Cell cell = gridManager.GetCell(x, y);
+                    if (cell != null)
+                    {
+                        cell.ResetColor();
+                    }
                 }
             }
         }
