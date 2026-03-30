@@ -276,10 +276,19 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     void Victory()
     {
-        turnText.text = "回合 " + currentTurn + " - 胜利！";
-        endTurnButton.interactable = false;
-        Debug.Log("Victory!");
-        GameUIManager.Instance.ShowGameOver(true);
+        if (LevelManager.Instance != null)
+        {
+            // 完成关卡，显示升级界面
+            LevelManager.Instance.CompleteLevel();
+        }
+        else
+        {
+            // 没有关卡管理器，直接显示游戏结束
+            turnText.text = "回合 " + currentTurn + " - 胜利！";
+            endTurnButton.interactable = false;
+            Debug.Log("Victory!");
+            GameUIManager.Instance.ShowGameOver(true);
+        }
     }
 
     /// <summary>
