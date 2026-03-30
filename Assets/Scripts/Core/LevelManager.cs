@@ -9,26 +9,22 @@ using UnityEngine.UI;
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
-    
+
     [Header("当前关卡")]
     public int currentLevel = 1;
     public int maxLevel = 10;
     public LevelData currentLevelData;
-    
-    [Header("难度设置")]
-    public AnimationCurve enemyCountCurve; // 敌人数随关卡增加
-    public AnimationCurve enemyHealthCurve; // 敌人血量随关卡增加
-    
+
+    [Header("游戏平衡配置")]
+    public GameBalanceSettings balanceSettings;
+
     [Header("UI")]
     public Text levelText;
     public Text progressText;
-    
-    // 所有可用的岛屿/关卡
-    private List<LevelData> availableLevels = new List<LevelData>();
-    
+
     // 玩家升级点数
     public int totalUpgradePoints = 0;
-    
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -50,14 +46,14 @@ public class LevelManager : MonoBehaviour
     {
         currentLevelData = new LevelData();
         currentLevelData.levelIndex = currentLevel;
-        
-        // 根据关卡计算敌人数量
-        int enemyCount = Mathf.RoundToInt(enemyCountCurve.Evaluate(currentLevel));
-        int buildingCount = 2 + currentLevel / 3; // 建筑数量随关卡增加
-        
+
+        // 使用平衡配置计算敌人数量
+        int enemyCount = balanceSettings.GetEnemyCount(currentLevel);
+        int buildingCount = balanceSettings.GetBuildingCount(currentLevel);
+
         currentLevelData.enemyCount = enemyCount;
         currentLevelData.buildingCount = buildingCount;
-        
+
         // 生成随机地图
         MapGenerator generator = FindObjectOfType<MapGenerator>();
         if (generator != null)
@@ -72,7 +68,7 @@ public class LevelManager : MonoBehaviour
     public void CompleteLevel()
     {
         // 奖励升级点数
-        int points = 1 + (currentLevel % 3 == 0 ? 1 : 0); // 每3关多给1点
+        int points = GetUpgradePointsForLevel();
         totalUpgradePoints += points;
         
         // 保存进度
@@ -83,7 +79,10 @@ public class LevelManager : MonoBehaviour
         }
         
         // 显示升级界面
-        UpgradeUIManager.Instance.ShowUpgradeScreen(points);
+        if (UpgradeUIManager.Instance != null)
+        {
+            UpgradeUIManager.Instance.ShowUpgradeScreen(points);
+        }
     }
 
     /// <summary>
@@ -99,10 +98,10 @@ public class LevelManager : MonoBehaviour
             Debug.Log("Game Complete! All levels cleared!");
             return;
         }
-        
+
         GenerateRandomLevel();
         UpdateLevelUI();
-        
+
         // 重新开始回合
         TurnManager turnManager = FindObjectOfType<TurnManager>();
         turnManager.CollectPlayerMechs();
@@ -138,7 +137,7 @@ public class LevelManager : MonoBehaviour
         {
             levelText.text = $"第 {currentLevel} 关";
         }
-        
+
         if (progressText != null)
         {
             progressText.text = $"{currentLevel}/{maxLevel}";
@@ -151,7 +150,7 @@ public class LevelManager : MonoBehaviour
     public bool UseUpgradePoint()
     {
         if (totalUpgradePoints <= 0) return false;
-        
+
         totalUpgradePoints--;
         SaveUpgradePoints();
         UpgradeUIManager.Instance.UpdateUpgradePointsDisplay();
@@ -163,7 +162,19 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     public int GetEnemyBaseHealth()
     {
-        return Mathf.RoundToInt(enemyHealthCurve.Evaluate(currentLevel));
+        if (balanceSettings != null)
+            return balanceSettings.GetEnemyBaseHealth(currentLevel);
+        return 2;
+    }
+
+    /// <summary>
+    /// 获取这关奖励升级点数
+    /// </summary>
+    public int GetUpgradePointsForLevel()
+    {
+        if (balanceSettings != null)
+            return balanceSettings.GetUpgradePoints(currentLevel);
+        return 1;
     }
 }
 
