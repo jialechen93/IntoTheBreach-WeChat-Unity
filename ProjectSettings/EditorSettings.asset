@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!100000 &amp;100000
+EditorSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 11
+  m_AssetSerializationMode: 1
+  m_EnableAlphaProcessing: 0
+  m_SpritePackerMode: 1
+  m_AndroidBuildTarget: 1
+  m_iOSBuildTarget: 1
+  m_DefaultBehaviorVersion: 2
+  m_VersionControlMode: 0
+  m_Serialization:
+    m_Object:
+      m_ForceText: 1
+      m_BinaryToTextDirectory: Assets
+      m_ForceBinary: 0
+  m_BuildAgainstConfiguredAssets: 1
+  m_enterPlayModeOptions: 0
+  m_allowCookiesInLightmap: 0
+  m_generateProjectLayout: 1
